@@ -1,0 +1,29 @@
+<!-- templates/logs.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Request Logs</title>
+</head>
+<body>
+    <h1>Request Logs</h1>
+    <table>
+        <tr>
+            <th>Method</th>
+            <th>URL</th>
+            <th>Headers</th>
+            <th>Body</th>
+            <th>Timestamp</th>
+        </tr>
+        {% for log in logs %}
+        <tr>
+            <td>{{ log.method }}</td>
+            <td>{{ log.url }}</td>
+            <td>{{ log.headers }}</td>
+            <td>{{ log.body }}</td>
+            <td>{{ log.timestamp }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
