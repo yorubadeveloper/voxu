@@ -1,11 +1,13 @@
 # VOXU
+![main.png](images%2Fmain.png)
 This Python package provides a request logging and viewing system for Flask applications. It allows developers to log and view HTTP requests made to their web applications, facilitating debugging and monitoring.
 
 ## Features:
+![modal.png](images%2Fmodal.png)
 - Middleware to log incoming requests to a database.
 - Configurable database connection and table name.
-- Dashboard to view logged requests (coming soon).
-- API key authentication for accessing the dashboard (coming soon).
+- Dashboard to view logged requests.
+- Authentication for accessing the dashboard (coming soon).
 - Customizable logging fields and formats (in-progress).
 - AI-powered request analysis and anomaly detection (in-progress).
 
@@ -35,7 +37,7 @@ voxu = Voxu(app)
 ```
 ### Access Logs:
 
-Navigate to /logs to view all logged requests in a HTML UI.
+Navigate to /voxu/logs to view all logged requests in a HTML UI.
 Configuration:
 
 Configure the database URL and table name during initialization.

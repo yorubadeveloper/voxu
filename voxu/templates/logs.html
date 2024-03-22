@@ -17,7 +17,7 @@
     </style>
 </head>
 <body class="container">
-<h1 class="my-5">Request Logs</h1>
+<h1 class="my-5">Voxu Logs</h1>
 <div class="form-group col-6">
     <input type="text" class="form-control" id="searchInput" placeholder="Search by status code, method, or URL">
 </div>
@@ -42,6 +42,8 @@
             {% if log.response_status == 200 %}
             <span class="badge badge-pill badge-success">{{ log.response_status }}</span>
             {% elif log.response_status >= 400 %}
+            <span class="badge badge-pill badge-warning">{{ log.response_status }}</span>
+            {% elif log.response_status >= 500 %}
             <span class="badge badge-pill badge-danger">{{ log.response_status }}</span>
             {% else %}
             <span class="badge badge-pill badge-secondary">{{ log.response_status }}</span>
@@ -72,7 +74,7 @@
                                        href="#headers{{ loop.index }}">Headers</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" data-toggle="tab" href="#body{{ loop.index }}">Body</a>
+                                    <a class="nav-link" data-toggle="tab" href="#body{{ loop.index }}">Payload</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" data-toggle="tab" href="#responseHeaders{{ loop.index }}">Response
@@ -108,6 +110,9 @@
     {% endfor %}
     </tbody>
 </table>
+<nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center" id="pagination"></ul>
+</nav>
 
 <!-- Include Bootstrap JS and jQuery -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
@@ -165,6 +170,35 @@
             console.log("Invalid content in element " + i);
         }
     }
+
+    function showItemsForPage(page) {
+        var itemsPerPage = 20; // Number of items per page
+        var startIndex = (page - 1) * itemsPerPage;
+        var endIndex = startIndex + itemsPerPage;
+
+        $('#logsTable tbody tr').hide().slice(startIndex, endIndex).show();
+    }
+
+    // Show initial page
+    showItemsForPage(1);
+
+    // Pagination initialization
+    var itemsPerPage = 20; // Number of items per page
+    var $tableRows = $('#logsTable tbody tr');
+    var pageCount = Math.ceil($tableRows.length / itemsPerPage);
+
+    // Add pagination items
+    for (var i = 1; i <= pageCount; i++) {
+        $('#pagination').append('<li class="page-item"><a class="page-link" href="#">' + i + '</a></li>');
+    }
+
+    // Pagination click event
+    $('#pagination').on('click', 'a', function (e) {
+        e.preventDefault();
+        var page = parseInt($(this).text());
+        showItemsForPage(page);
+        $(this).parent().addClass('active').siblings().removeClass('active');
+    });
 </script>
 </body>
 </html>
