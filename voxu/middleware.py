@@ -1,5 +1,7 @@
 import json
+
 from werkzeug.wrappers import Request, Response
+
 from voxu.models import get_http_request_log_table_class
 
 

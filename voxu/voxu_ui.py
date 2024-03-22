@@ -1,14 +1,15 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, current_app
 
-from voxu.database import db
+from .database import DatabaseConfigurator
 from .models import get_http_request_log_table_class
 
-voxu_blueprint = Blueprint('voxu', __name__, url_prefix='/voxu')
+voxu_blueprint = Blueprint('voxu', __name__, url_prefix='/voxu', template_folder='templates')
 
 
 @voxu_blueprint.route('/logs')
 def logs():
     HTTPRequestLog = get_http_request_log_table_class()
-    logs = db.session.query(HTTPRequestLog).all()
-    db.session.close()
+    db_session = DatabaseConfigurator(current_app).init_db()
+    logs = db_session.query(HTTPRequestLog).all()
+    db_session.close()
     return render_template('logs.html', logs=logs)

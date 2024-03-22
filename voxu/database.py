@@ -6,24 +6,23 @@ from voxu.models import get_http_request_log_table_class, Base
 
 class DatabaseConfigurator:
 
-    def __init__(self, app, logging_table_name="http_request_logs", database_url=None):
-        self.logging_table_name = logging_table_name
-        if database_url is None:
-            self.database_url = app.config['SQLALCHEMY_DATABASE_URI']
-        else:
-            self.database_url = database_url
+    def __init__(self, app):
+        self.voxu_table = app.config.get('VOXU_LOG_TABLE', 'http_request_logs')
+        self.database_url = app.config.get('SQLALCHEMY_DATABASE_URI', None)
+        if not self.database_url:
+            raise ValueError("SQLALCHEMY_DATABASE_URI is not set in the app's configuration")
 
     def init_db(self):
         engine = create_engine(self.database_url)
 
         # Ensure the table exists
-        if not engine.dialect.has_table(engine.connect(), self.logging_table_name):
-            HTTPRequestLog = get_http_request_log_table_class(self.logging_table_name)
+        if not engine.dialect.has_table(engine.connect(), self.voxu_table):
+            HTTPRequestLog = get_http_request_log_table_class(self.voxu_table)
             Base.metadata.create_all(engine, tables=[HTTPRequestLog.__table__])
 
         db_session = scoped_session(sessionmaker(autocommit=False,
-                                                      autoflush=False,
-                                                      bind=engine))
+                                                 autoflush=False,
+                                                 bind=engine))
         return db_session
 
     def close_db(self, app, db_session):
