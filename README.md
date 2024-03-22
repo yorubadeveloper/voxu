@@ -6,7 +6,8 @@ This Python package provides a request logging and viewing system for Flask appl
 - Configurable database connection and table name.
 - Dashboard to view logged requests (coming soon).
 - API key authentication for accessing the dashboard (coming soon).
-- Pydantic models for data validation and serialization (in-progress).
+- Customizable logging fields and formats (in-progress).
+- AI-powered request analysis and anomaly detection (in-progress).
 
 ## Usage:
 
