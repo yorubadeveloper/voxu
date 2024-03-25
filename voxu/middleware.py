@@ -1,4 +1,5 @@
 import json
+import traceback
 from io import BytesIO
 
 from werkzeug.wrappers import Request, Response
@@ -44,11 +45,20 @@ class RequestResponseLoggingMiddleware:
             response_headers.extend(headers)
             return original_start_response(status, headers, exc_info)
 
-        response = self.app(environ, custom_start_response)
+        try:
+            # Call the application with the custom start_response function
+            response = self.app(environ, custom_start_response)
 
-        for data in response:
-            response_body.append(data)
-            yield data
+            for data in response:
+                response_body.append(data)
+                yield data
+
+        except Exception as e:
+            traceback_str = traceback.format_exc()
+            self.log_exception(request, traceback_str)
+
+            # Re-raise the exception to be handled by the WSGI server
+            raise
 
         # Construct the response object
         response_ = Response(
@@ -64,7 +74,7 @@ class RequestResponseLoggingMiddleware:
         if any([ext in request.path for ext in unallowed_extensions_in_path]):
             return response
 
-        if request.path != '/voxu/logs':
+        if 'voxu/log' not in request.path:
             self.log_request_response(request, response_, data_to_log)
 
         return response
@@ -80,6 +90,27 @@ class RequestResponseLoggingMiddleware:
             response_status=response.status_code,
             response_headers=json.dumps(dict(response.headers)),
             response_body=response.get_data(as_text=True)
+        )
+        self.db_session.add(log_entry)
+        try:
+            self.db_session.commit()
+        except Exception as e:
+            self.db_session.rollback()
+            raise e
+        finally:
+            self.db_session.close()
+
+    def log_exception(self, request, traceback_str):
+        # Log the exception details
+        log_entry = self.HTTPRequestLog(
+            ip_address=request.remote_addr,
+            method=request.method,
+            url=request.url,
+            headers=json.dumps(dict(request.headers)),
+            body="Exception occurred",
+            response_status=500,
+            response_headers="",
+            response_body=traceback_str
         )
         self.db_session.add(log_entry)
         try:

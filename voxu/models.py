@@ -7,7 +7,8 @@ Base = declarative_base()
 
 
 def get_http_request_log_table_class(table_name='http_request_logs'):
-    class HTTPRequestLog(Base):
+    DynamicBase = declarative_base(class_registry=dict())
+    class HTTPRequestLog(DynamicBase):
         __tablename__ = table_name
         __table_args__ = {'extend_existing': True}
         id = Column(Integer, primary_key=True)

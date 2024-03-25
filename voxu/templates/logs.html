@@ -41,10 +41,10 @@
         <td>
             {% if log.response_status == 200 %}
             <span class="badge badge-pill badge-success">{{ log.response_status }}</span>
-            {% elif log.response_status >= 400 %}
-            <span class="badge badge-pill badge-warning">{{ log.response_status }}</span>
             {% elif log.response_status >= 500 %}
             <span class="badge badge-pill badge-danger">{{ log.response_status }}</span>
+            {% elif log.response_status >= 400 %}
+            <span class="badge badge-pill badge-warning">{{ log.response_status }}</span>
             {% else %}
             <span class="badge badge-pill badge-secondary">{{ log.response_status }}</span>
             {% endif %}
@@ -84,6 +84,12 @@
                                     <a class="nav-link" data-toggle="tab" href="#responseBody{{ loop.index }}">Response
                                         Body</a>
                                 </li>
+                                {% if log.response_status != 200 %}
+                                <li class="nav-item">
+                                    <a class="nav-link" data-toggle="tab" href="#aiSuggestion{{ loop.index }}">Get AI
+                                        suggestion</a>
+                                </li>
+                                {% endif %}
                             </ul>
 
                             <!-- Tab panes -->
@@ -100,6 +106,16 @@
                                 <div id="responseBody{{ loop.index }}" class="container tab-pane fade"><br>
                                     <pre>{{ log.response_body }}</pre>
                                 </div>
+                                {% if log.response_status != 200 %}
+                                <div id="aiSuggestion{{ loop.index }}" class="container tab-pane fade"><br>
+                                    <button id="aiSuggestionBtn{{ log.id }}"
+                                            class="btn btn-secondary get-ai-suggestion-btn my-4"
+                                            data-log-id="{{ log.id }}" onclick="getAISuggestion('{{log.id}}')">
+                                        View Suggestion
+                                    </button>
+                                    <div id="aiSuggestionContent{{ log.id }}"></div>
+                                </div>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
@@ -130,7 +146,6 @@
         var timestamps = document.querySelectorAll('.timestamp');
         timestamps.forEach(function (element) {
             var timestamp = element.textContent.trim();
-            console.log(timestamp)
             var timeAgo = moment.utc(timestamp, "YYYY-MM-DD HH:mm:ss").fromNow();
             element.textContent = timeAgo;
         });
@@ -199,6 +214,29 @@
         showItemsForPage(page);
         $(this).parent().addClass('active').siblings().removeClass('active');
     });
+
+    function getAISuggestion(logId) {
+        const aiSuggestionBtn = document.getElementById(`aiSuggestionBtn${logId}`);
+        aiSuggestionBtn.textContent = 'Loading...';
+        aiSuggestionBtn.disabled = true;
+        fetch(`/voxu/log/${logId}`)
+            .then(response => response.text())
+            .then(data => {
+                const aiSuggestionContent = document.getElementById(`aiSuggestionContent${logId}`);
+                if (data) {
+                    aiSuggestionContent.innerHTML = `<p>${data}</p>`;
+                } else {
+                    aiSuggestionContent.innerHTML = `<p>No AI suggestion available.</p>`;
+                }
+                aiSuggestionBtn.remove();
+            })
+            .catch(error => {
+                console.error('Error fetching AI suggestion:', error);
+                const aiSuggestionContent = document.getElementById(`aiSuggestionContent${logId}`);
+                aiSuggestionContent.innerHTML = `<p>Error fetching AI suggestion. Please try again later.</p>`;
+                aiSuggestionBtn.textContent = 'Try Again';
+            });
+    }
 </script>
 </body>
 </html>
