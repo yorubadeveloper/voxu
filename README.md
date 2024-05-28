@@ -14,7 +14,9 @@ This Python package provides a request logging and viewing system for Flask appl
 ## Usage:
 
 ### Installation:
-`pip install voxu`
+```
+pip install voxu
+```
 
 ### Initialization:
 Set SQLALCHEMY_DATABASE_URI in your Flask app configuration.
